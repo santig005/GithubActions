@@ -1,0 +1,47 @@
+name: Google Search
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  buscar-en-google:
+    name: Buscar "libro" en Google
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar Playwright y dependencias
+        run: |
+          npm init -y
+          npm install playwright
+          npx playwright install chromium --with-deps
+
+      - name: Ejecutar búsqueda en Google
+        run: |
+          node scripts/google-search.js
+
+      - name: Mostrar resultado en resumen
+        if: success()
+        run: |
+          echo "## 🔍 Búsqueda realizada en Google: \"libro\"" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f search-result.txt ]; then
+            echo "### Primer resultado encontrado:" >> $GITHUB_STEP_SUMMARY
+            node -e "
+              const r = JSON.parse(require('fs').readFileSync('search-result.txt', 'utf8'));
+              console.log('**Título:** ' + r.titulo);
+              console.log('');
+              console.log('**URL:** ' + r.url);
+              console.log('');
+              console.log('**Descripción:** ' + r.descripcion);
+            " >> $GITHUB_STEP_SUMMARY
+          fi
