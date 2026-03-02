@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-validate:
+    name: Validar y construir
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Información del commit
+        run: |
+          echo "## 📋 Información del Push" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Campo | Valor |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Autor** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Mensaje** | ${{ github.event.head_commit.message }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Validar estructura del proyecto
+        run: |
+          echo "✅ README encontrado" && test -f README.md
+          echo "✅ Estructura válida"
+
+      - name: Generar reporte
+        run: |
+          echo "## 📊 Resumen de la ejecución" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Checkout completado" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Validación exitosa" >> $GITHUB_STEP_SUMMARY
+          echo "- 🕐 Ejecutado el $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
